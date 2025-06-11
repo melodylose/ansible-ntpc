@@ -1,3 +1,16 @@
+# 使用 raw 模組手動收集操作系統信息
+- name: 收集操作系統信息
+  raw: cat /etc/os-release | grep -E "ID=|ID_LIKE=" || cat /etc/redhat-release || uname -a
+  register: os_info
+  become: no
+  ignore_errors: true
+
+- name: 設置操作系統家族變量
+  set_fact:
+    is_redhat: "{{ (os_info.stdout is search('rhel|centos|fedora|rocky') or os_info.stdout is search('Red Hat')) | bool }}"
+    is_debian: "{{ (os_info.stdout is search('debian|ubuntu')) | bool }}"
+  ignore_errors: true
+
 - name: 密碼原則檢查1-密碼最常使用期限90天,密碼最短使用期限1天
   command: grep -E "PASS_MAX_DAYS|PASS_MIN_DAYS|PASS_MIN_LEN" /etc/login.defs
   ignore_errors: true
@@ -31,7 +44,7 @@
 ###########################RedHat###########################
 
 - name: 作業系統是 RedHat
-  when: ansible_os_family == "RedHat"
+  when: is_redhat | bool
   block:
 
   - name: 密碼原則檢查2-強制執行密碼歷程記錄3代
@@ -83,7 +96,7 @@
 ###########################Debian###########################
 
 - name: 作業系統是 Debian
-  when: ansible_os_family == "Debian"
+  when: is_debian | bool
   block:
 
   - name: 密碼原則檢查2-強制執行密碼歷程記錄3代
