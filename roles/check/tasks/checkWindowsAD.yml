@@ -1,0 +1,9 @@
+- name: 檢查windowsAD連線設定
+  command: cat /etc/krb5.conf
+  ignore_errors: true
+  register: command_output
+- debug:
+    var: command_output.stdout_lines
+
+
+

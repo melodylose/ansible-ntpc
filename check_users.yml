@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - name: Get users with raw module
+      raw: cat /etc/passwd
+      register: passwd_content
+      
+    - name: Print users
+      debug:
+        var: passwd_content.stdout_lines

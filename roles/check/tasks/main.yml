@@ -1,0 +1,27 @@
+- name: 帳號清查
+  include_tasks: 
+    file: checkUsers.yml
+
+- name: 主機校時檢查
+  include_tasks: 
+    file: checkRC5905.yml
+
+- name: 密碼原則
+  include_tasks: 
+    file: checkPWD.yml
+
+- name: 密碼更換紀錄
+  include_tasks: 
+    file: checkAccount.yml
+
+- name: 上次變更密碼紀錄
+  include_tasks: 
+    file: checkAccountPWD.yml
+
+- name: windows AD 檢查
+  include_tasks: 
+    file: checkWindowsAD.yml
+
+- name: 檢查防火牆
+  include_tasks: 
+    file: checkFirewall.yml

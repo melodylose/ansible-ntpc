@@ -1,0 +1,70 @@
+# 檢查系統時間
+
+- name: 蒐集已安裝的套件
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: 基本時間和時區檢查（不依賴特定時間同步服務）
+  block:
+    - name: Check timezone using /etc/timezone
+      raw: cat /etc/timezone || echo "Timezone file not found"
+      ignore_errors: true
+      register: timezone_file
+      
+    - name: Check timezone using date command
+      raw: date +"%Z %z"
+      ignore_errors: true
+      register: timezone_date
+      
+    - name: Check NTP configuration
+      raw: grep -r "^server" /etc/ntp.conf 2>/dev/null || echo "NTP config not found"
+      ignore_errors: true
+      register: ntp_config
+      
+    - name: Check if NTP service is running
+      raw: ps -ef | grep -i "ntp[d]" || echo "NTP service not running"
+      ignore_errors: true
+      register: ntp_service
+      
+    - name: 組合時間同步基本資訊
+      set_fact:
+        basic_time_info:
+          stdout_lines:
+            - "Timezone from file: {{ timezone_file.stdout | default('Not available') }}"
+            - "Current timezone (date command): {{ timezone_date.stdout | default('Not available') }}"
+            - "NTP configuration: {{ ntp_config.stdout_lines | default(['Not available']) | join(', ') }}"
+            - "NTP service status: {{ ntp_service.stdout_lines | default(['Not running']) | join(', ') }}"
+      
+    - name: 顯示基本時間同步資訊
+      debug:
+        var: basic_time_info.stdout_lines
+
+- name: ntp case chrony
+  when: "'chrony' in ansible_facts.packages"
+  block:
+  - name: check RC5905
+    raw: chronyc sources
+    ignore_errors: true
+    register: command_output
+  - debug:
+      var: command_output.stdout_lines
+
+- name: ntp case systemd-timesyncd
+  when: "'systemd-timesyncd' in ansible_facts.packages"
+  block:
+  - name: check systemd-timesyncd status
+    raw: systemctl status systemd-timesyncd
+    ignore_errors: true
+    register: timesyncd_status
+  - debug:
+      var: timesyncd_status.stdout_lines
+
+- name: ntp case ntp
+  when: "'ntp' in ansible_facts.packages"
+  block:
+  - name: check RC5905
+    raw: ntpq -p
+    ignore_errors: true
+    register: command_output
+  - debug:
+      var: command_output.stdout_lines

@@ -1,0 +1,7 @@
+- name: 帳戶鎖定原則檢查
+  command: grep -n auth /etc/pam.d/sshd
+  ignore_errors: true
+  register: command_output
+
+- debug:
+    var: command_output.stdout_lines

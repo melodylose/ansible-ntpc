@@ -1,0 +1,133 @@
+- name: 密碼原則檢查1-密碼最常使用期限90天,密碼最短使用期限1天
+  command: grep -E "PASS_MAX_DAYS|PASS_MIN_DAYS|PASS_MIN_LEN" /etc/login.defs
+  ignore_errors: true
+  register: command_output
+- debug:
+    var: command_output.stdout_lines
+
+- name: 檢查帳戶鎖定原則1.重設帳戶鎖定計數器的時間
+  shell: |
+    if grep -q "unlock_time=900" /etc/pam.d/sshd; then
+      echo "已設定: 重設帳戶鎖定計數器的時間為15分鐘 (unlock_time=900)"
+    elif grep -q "unlock_time=" /etc/pam.d/sshd; then
+      echo "警告: 重設帳戶鎖定計數器的時間設定不是15分鐘"
+      grep "unlock_time=" /etc/pam.d/sshd
+    else
+      echo "未設定: 未找到重設帳戶鎖定計數器的時間設定 (unlock_time)"
+      echo "檢查 /etc/pam.d/sshd 文件是否存在:"
+      if [ -f /etc/pam.d/sshd ]; then
+        echo "文件存在，但未包含 unlock_time 設定"
+      else
+        echo "文件不存在"
+      fi
+    fi
+  args:
+    executable: /bin/bash
+  ignore_errors: true
+  register: command_output
+- debug:
+    var: command_output.stdout_lines
+
+###########################RedHat###########################
+
+- name: 作業系統是 RedHat
+  when: ansible_os_family == "RedHat"
+  block:
+
+  - name: 密碼原則檢查2-強制執行密碼歷程記錄3代
+    shell: |
+      if grep -q "remember=3" /etc/pam.d/system-auth; then
+        echo "已設定: 強制執行密碼歷程記錄3代 (remember=3)"
+      elif grep -q "remember=" /etc/pam.d/system-auth; then
+        echo "警告: 密碼歷程記錄設定值不是3代"
+        grep "remember=" /etc/pam.d/system-auth
+      else
+        echo "未設定: 未找到密碼歷程記錄設定 (remember)"
+        echo "檢查 /etc/pam.d/system-auth 文件是否存在:"
+        if [ -f /etc/pam.d/system-auth ]; then
+          echo "文件存在，但未包含 remember 設定"
+        else
+          echo "文件不存在"
+        fi
+      fi
+    args:
+      executable: /bin/bash
+    ignore_errors: true
+    register: command_output
+  - debug:
+      var: command_output.stdout_lines
+
+  - name: 密碼原則檢查3-最小密碼長度8碼
+    shell: |
+      if grep -q "minlen=8" /etc/pam.d/system-auth; then
+        echo "已設定: 最小密碼長度為8碼 (minlen=8)"
+      elif grep -q "minlen=" /etc/pam.d/system-auth; then
+        echo "警告: 最小密碼長度設定值不是8碼"
+        grep "minlen=" /etc/pam.d/system-auth
+      else
+        echo "未設定: 未找到最小密碼長度設定 (minlen)"
+        echo "檢查 /etc/pam.d/system-auth 文件是否存在:"
+        if [ -f /etc/pam.d/system-auth ]; then
+          echo "文件存在，但未包含 minlen 設定"
+        else
+          echo "文件不存在"
+        fi
+      fi
+    args:
+      executable: /bin/bash
+    ignore_errors: true
+    register: command_output
+  - debug:
+      var: command_output.stdout_lines
+
+###########################Debian###########################
+
+- name: 作業系統是 Debian
+  when: ansible_os_family == "Debian"
+  block:
+
+  - name: 密碼原則檢查2-強制執行密碼歷程記錄3代
+    shell: |
+      if grep -q "remember=3" /etc/pam.d/common-password; then
+        echo "已設定: 強制執行密碼歷程記錄3代 (remember=3)"
+      elif grep -q "remember=" /etc/pam.d/common-password; then
+        echo "警告: 密碼歷程記錄設定值不是3代"
+        grep "remember=" /etc/pam.d/common-password
+      else
+        echo "未設定: 未找到密碼歷程記錄設定 (remember)"
+        echo "檢查 /etc/pam.d/common-password 文件是否存在:"
+        if [ -f /etc/pam.d/common-password ]; then
+          echo "文件存在，但未包含 remember 設定"
+        else
+          echo "文件不存在"
+        fi
+      fi
+    args:
+      executable: /bin/bash
+    ignore_errors: true
+    register: command_output
+  - debug:
+      var: command_output.stdout_lines
+
+  - name: 密碼原則檢查3-最小密碼長度8碼
+    shell: |
+      if grep -q "minlen=8" /etc/pam.d/common-password; then
+        echo "已設定: 最小密碼長度為8碼 (minlen=8)"
+      elif grep -q "minlen=" /etc/pam.d/common-password; then
+        echo "警告: 最小密碼長度設定值不是8碼"
+        grep "minlen=" /etc/pam.d/common-password
+      else
+        echo "未設定: 未找到最小密碼長度設定 (minlen)"
+        echo "檢查 /etc/pam.d/common-password 文件是否存在:"
+        if [ -f /etc/pam.d/common-password ]; then
+          echo "文件存在，但未包含 minlen 設定"
+        else
+          echo "文件不存在"
+        fi
+      fi
+    args:
+      executable: /bin/bash
+    ignore_errors: true
+    register: command_output
+  - debug:
+      var: command_output.stdout_lines

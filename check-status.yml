@@ -1,0 +1,6 @@
+---
+# 檢查系統狀態
+- hosts: all
+  roles:
+      - { role: check }
+      - { role: check-jobs}

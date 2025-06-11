@@ -1,0 +1,7 @@
+- name: 清查防火牆政策
+  raw: sudo firewall-cmd --list-all-zones
+  ignore_errors: true
+  register: command_output
+
+- debug:
+    var: command_output.stdout_lines

@@ -1,0 +1,31 @@
+- name: 查詢上次變更密碼日期 AH2313
+  shell: |
+    if id AH2313 &>/dev/null; then
+      echo "使用者 AH2313 存在，檢查密碼變更日期:"
+      chage -l AH2313 || echo "無法獲取密碼變更信息"
+    else
+      echo "使用者 AH2313 不存在"
+    fi
+  args:
+    executable: /bin/bash
+  ignore_errors: true
+  register: command_output
+
+- debug:
+    var: command_output.stdout_lines
+
+- name: 查詢上次變更密碼日期 wez
+  shell: |
+    if id wez &>/dev/null; then
+      echo "使用者 wez 存在，檢查密碼變更日期:"
+      chage -l wez || echo "無法獲取密碼變更信息"
+    else
+      echo "使用者 wez 不存在"
+    fi
+  args:
+    executable: /bin/bash
+  ignore_errors: true
+  register: command_output
+
+- debug:
+    var: command_output.stdout_lines

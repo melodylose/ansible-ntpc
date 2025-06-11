@@ -1,0 +1,8 @@
+# 檢查系統帳號
+- name: check linux user
+  ignore_errors: true
+  command:  cat /etc/passwd
+  register: command_output
+
+- debug:
+    var: command_output.stdout_lines
