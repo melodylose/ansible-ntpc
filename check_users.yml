@@ -1,5 +1,6 @@
 ---
 - hosts: all
+  gather_facts: no
   tasks:
     - name: Get users with raw module
       raw: cat /etc/passwd

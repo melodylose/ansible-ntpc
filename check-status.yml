@@ -1,6 +1,7 @@
 ---
 # 檢查系統狀態
 - hosts: all
+  gather_facts: no
   roles:
       - { role: check }
       - { role: check-jobs}
